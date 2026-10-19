@@ -1,3 +1,5 @@
+> **Pocket Congress mirror fork.** This is [Pocket Congress](https://github.com/Pocket-Congress)'s fork of [unitedstates/congress-legislators](https://github.com/unitedstates/congress-legislators). `main` and `gh-pages` are untouched mirrors of upstream, and the default branch `pocket-congress` is upstream `main` plus our additions. The [Sync upstream](.github/workflows/sync-upstream.yml) workflow runs daily: it syncs both mirrors from upstream with `gh repo sync`, then merges `main` into `pocket-congress` (a merge conflict fails the run). The Pocket Congress server reads the JSON files this fork publishes to GitHub Pages at https://pocket-congress.github.io/congress-legislators/ (e.g. `legislators-current.json`, `committee-membership-current.json`, `committees-current.json`).
+
 congress-legislators
 ====================
 

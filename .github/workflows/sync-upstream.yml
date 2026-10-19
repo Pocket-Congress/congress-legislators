@@ -1,0 +1,43 @@
+# Pocket Congress mirror fork of unitedstates/congress-legislators.
+# The Pocket Congress server reads the published JSON from this fork's GitHub Pages site (https://pocket-congress.github.io/congress-legislators/).
+# `main` and `gh-pages` are pure mirrors of upstream (never commit to them); `pocket-congress` is the default branch and carries upstream `main` plus our additions (this workflow, the README note).
+# Daily: fast-forward both mirrors from upstream, then merge `main` into `pocket-congress`. A merge conflict fails the run so it gets noticed.
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      # Mirror upstream branches into the fork (server-side merge-upstream; fails if a mirror has diverged).
+      - name: Sync mirrors
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for branch in main gh-pages; do
+            gh repo sync "$GITHUB_REPOSITORY" --source unitedstates/congress-legislators --branch "$branch"
+          done
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: pocket-congress
+          fetch-depth: 0
+
+      # Carry the freshly synced upstream `main` into our branch; a conflicting merge exits non-zero.
+      - name: Merge main into pocket-congress
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git merge --no-edit origin/main
+          git push origin HEAD:pocket-congress
